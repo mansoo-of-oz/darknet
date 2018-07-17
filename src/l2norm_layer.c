@@ -12,14 +12,19 @@
 layer make_l2norm_layer(int batch, int inputs)
 {
     fprintf(stderr, "l2norm                                         %4d\n",  inputs);
-    layer l = {0};
+
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: layer l = {0};
+    layer l;
+    memset(&l, 0x00, sizeof(layer));
+
     l.type = L2NORM;
     l.batch = batch;
     l.inputs = inputs;
     l.outputs = inputs;
-    l.output = calloc(inputs*batch, sizeof(float));
-    l.scales = calloc(inputs*batch, sizeof(float));
-    l.delta = calloc(inputs*batch, sizeof(float));
+    l.output = (float *)calloc(inputs*batch, sizeof(float));
+    l.scales = (float *)calloc(inputs*batch, sizeof(float));
+    l.delta = (float *)calloc(inputs*batch, sizeof(float));
 
     l.forward = forward_l2norm_layer;
     l.backward = backward_l2norm_layer;

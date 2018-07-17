@@ -30,26 +30,31 @@ layer make_rnn_layer(int batch, int inputs, int outputs, int steps, ACTIVATION a
 {
     fprintf(stderr, "RNN Layer: %d inputs, %d outputs\n", inputs, outputs);
     batch = batch / steps;
-    layer l = {0};
+
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: layer l = {0};
+    layer l;
+    memset(&l, 0x00, sizeof(layer));
+    
     l.batch = batch;
     l.type = RNN;
     l.steps = steps;
     l.inputs = inputs;
 
-    l.state = calloc(batch*outputs, sizeof(float));
-    l.prev_state = calloc(batch*outputs, sizeof(float));
+    l.state = (float *)calloc(batch*outputs, sizeof(float));
+    l.prev_state = (float *)calloc(batch*outputs, sizeof(float));
 
-    l.input_layer = malloc(sizeof(layer));
+    l.input_layer = (struct layer *)malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     *(l.input_layer) = make_connected_layer(batch*steps, inputs, outputs, activation, batch_normalize, adam);
     l.input_layer->batch = batch;
 
-    l.self_layer = malloc(sizeof(layer));
+    l.self_layer = (struct layer *)malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     *(l.self_layer) = make_connected_layer(batch*steps, outputs, outputs, activation, batch_normalize, adam);
     l.self_layer->batch = batch;
 
-    l.output_layer = malloc(sizeof(layer));
+    l.output_layer = (struct layer *)malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     *(l.output_layer) = make_connected_layer(batch*steps, outputs, outputs, activation, batch_normalize, adam);
     l.output_layer->batch = batch;

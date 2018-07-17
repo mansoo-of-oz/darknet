@@ -1,5 +1,5 @@
-GPU=1
-CUDNN=1
+GPU=0 
+CUDNN=0
 OPENCV=1
 OPENMP=0
 DEBUG=0
@@ -19,8 +19,7 @@ ALIB=libdarknet.a
 EXEC=darknet
 OBJDIR=./obj/
 
-CC=gcc
-C++=g++
+CC=g++
 NVCC=nvcc 
 AR=ar
 ARFLAGS=rcs
@@ -28,6 +27,7 @@ OPTS=-Ofast
 LDFLAGS= -lm -pthread 
 COMMON= -Iinclude/ -Isrc/
 CFLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC
+CPP_FLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -std=c++11
 
 ifeq ($(OPENMP), 1) 
 CFLAGS+= -fopenmp
@@ -74,19 +74,19 @@ all: obj backup results $(SLIB) $(ALIB) $(EXEC)
 
 
 $(EXEC): $(EXECOBJ) $(ALIB)
-	$(C++) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(ALIB)
+	$(CC) $(COMMON) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(ALIB)
 
 $(ALIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
 $(SLIB): $(OBJS)
-	$(C++) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
-
-$(OBJDIR)%.o: %.cxx $(DEPS)
-	$(C++) $(COMMON) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
 $(OBJDIR)%.o: %.c $(DEPS)
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)%.o: %.cxx $(DEPS)
+	$(CC) $(COMMON) $(CPP_FLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
 	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@

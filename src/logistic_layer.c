@@ -12,15 +12,20 @@
 layer make_logistic_layer(int batch, int inputs)
 {
     fprintf(stderr, "logistic x entropy                             %4d\n",  inputs);
-    layer l = {0};
+
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: layer l = {0};
+    layer l;
+    memset(&l, 0x00, sizeof(layer));
+
     l.type = LOGXENT;
     l.batch = batch;
     l.inputs = inputs;
     l.outputs = inputs;
-    l.loss = calloc(inputs*batch, sizeof(float));
-    l.output = calloc(inputs*batch, sizeof(float));
-    l.delta = calloc(inputs*batch, sizeof(float));
-    l.cost = calloc(1, sizeof(float));
+    l.loss = (float *)calloc(inputs*batch, sizeof(float));
+    l.output = (float *)calloc(inputs*batch, sizeof(float));
+    l.delta = (float *)calloc(inputs*batch, sizeof(float));
+    l.cost = (float *)calloc(1, sizeof(float));
 
     l.forward = forward_logistic_layer;
     l.backward = backward_logistic_layer;

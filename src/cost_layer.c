@@ -41,7 +41,12 @@ char *get_cost_string(COST_TYPE a)
 cost_layer make_cost_layer(int batch, int inputs, COST_TYPE cost_type, float scale)
 {
     fprintf(stderr, "cost                                           %4d\n",  inputs);
-    cost_layer l = {0};
+
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: cost_layer l = {0};
+    cost_layer l;
+    memset(&l, 0x00, sizeof(cost_layer));
+
     l.type = COST;
 
     l.scale = scale;
@@ -49,9 +54,9 @@ cost_layer make_cost_layer(int batch, int inputs, COST_TYPE cost_type, float sca
     l.inputs = inputs;
     l.outputs = inputs;
     l.cost_type = cost_type;
-    l.delta = calloc(inputs*batch, sizeof(float));
-    l.output = calloc(inputs*batch, sizeof(float));
-    l.cost = calloc(1, sizeof(float));
+    l.delta = (float *)calloc(inputs*batch, sizeof(float));
+    l.output = (float *)calloc(inputs*batch, sizeof(float));
+    l.cost = (float *)calloc(1, sizeof(float));
 
     l.forward = forward_cost_layer;
     l.backward = backward_cost_layer;
@@ -69,8 +74,8 @@ void resize_cost_layer(cost_layer *l, int inputs)
 {
     l->inputs = inputs;
     l->outputs = inputs;
-    l->delta = realloc(l->delta, inputs*l->batch*sizeof(float));
-    l->output = realloc(l->output, inputs*l->batch*sizeof(float));
+    l->delta = (float *)realloc(l->delta, inputs*l->batch*sizeof(float));
+    l->output = (float *)realloc(l->output, inputs*l->batch*sizeof(float));
 #ifdef GPU
     cuda_free(l->delta_gpu);
     cuda_free(l->output_gpu);

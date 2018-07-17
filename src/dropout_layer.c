@@ -6,13 +6,17 @@
 
 dropout_layer make_dropout_layer(int batch, int inputs, float probability)
 {
-    dropout_layer l = {0};
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: dropout_layer l = {0};
+    dropout_layer l;
+    memset(&l, 0x00, sizeof(dropout_layer));
+
     l.type = DROPOUT;
     l.probability = probability;
     l.inputs = inputs;
     l.outputs = inputs;
     l.batch = batch;
-    l.rand = calloc(inputs*batch, sizeof(float));
+    l.rand = (float *)calloc(inputs*batch, sizeof(float));
     l.scale = 1./(1.-probability);
     l.forward = forward_dropout_layer;
     l.backward = backward_dropout_layer;
@@ -27,7 +31,7 @@ dropout_layer make_dropout_layer(int batch, int inputs, float probability)
 
 void resize_dropout_layer(dropout_layer *l, int inputs)
 {
-    l->rand = realloc(l->rand, l->inputs*l->batch*sizeof(float));
+    l->rand = (float *)realloc(l->rand, l->inputs*l->batch*sizeof(float));
     #ifdef GPU
     cuda_free(l->rand_gpu);
 

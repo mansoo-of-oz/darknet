@@ -30,7 +30,12 @@ layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int ou
 {
     fprintf(stderr, "CRNN Layer: %d x %d x %d image, %d filters\n", h,w,c,output_filters);
     batch = batch / steps;
-    layer l = {0};
+
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: layer l = {0};
+    layer l;
+    memset(&l, 0x00, sizeof(layer));
+
     l.batch = batch;
     l.type = CRNN;
     l.steps = steps;
@@ -44,19 +49,19 @@ layer make_crnn_layer(int batch, int h, int w, int c, int hidden_filters, int ou
     l.hidden = h * w * hidden_filters;
     l.outputs = l.out_h * l.out_w * l.out_c;
 
-    l.state = calloc(l.hidden*batch*(steps+1), sizeof(float));
+    l.state = (float *)calloc(l.hidden*batch*(steps+1), sizeof(float));
 
-    l.input_layer = malloc(sizeof(layer));
+    l.input_layer = (struct layer *)malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     *(l.input_layer) = make_convolutional_layer(batch*steps, h, w, c, hidden_filters, 1, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
     l.input_layer->batch = batch;
 
-    l.self_layer = malloc(sizeof(layer));
+    l.self_layer = (struct layer *)malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     *(l.self_layer) = make_convolutional_layer(batch*steps, h, w, hidden_filters, hidden_filters, 1, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
     l.self_layer->batch = batch;
 
-    l.output_layer = malloc(sizeof(layer));
+    l.output_layer = (struct layer *)malloc(sizeof(layer));
     fprintf(stderr, "\t\t");
     *(l.output_layer) = make_convolutional_layer(batch*steps, h, w, hidden_filters, output_filters, 1, 3, 1, 1,  activation, batch_normalize, 0, 0, 0);
     l.output_layer->batch = batch;

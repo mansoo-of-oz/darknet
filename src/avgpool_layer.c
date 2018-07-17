@@ -5,7 +5,12 @@
 avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
 {
     fprintf(stderr, "avg                     %4d x%4d x%4d   ->  %4d\n",  w, h, c, c);
-    avgpool_layer l = {0};
+
+    // 2018.7,17, by kmansoo@gmail.com, 구조체 초기화를 C++ 컴파일러에서도 빌드될 수 있도록 수정
+    // 원본: avgpool_layer l = {0};
+    avgpool_layer l;
+    memset(&l, 0x00, sizeof(avgpool_layer));
+
     l.type = AVGPOOL;
     l.batch = batch;
     l.h = h;
@@ -17,8 +22,8 @@ avgpool_layer make_avgpool_layer(int batch, int w, int h, int c)
     l.outputs = l.out_c;
     l.inputs = h*w*c;
     int output_size = l.outputs * batch;
-    l.output =  calloc(output_size, sizeof(float));
-    l.delta =   calloc(output_size, sizeof(float));
+    l.output =  (float *)calloc(output_size, sizeof(float));
+    l.delta =   (float *)calloc(output_size, sizeof(float));
     l.forward = forward_avgpool_layer;
     l.backward = backward_avgpool_layer;
     #ifdef GPU
