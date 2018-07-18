@@ -690,7 +690,9 @@ void train_dcgan(char *cfg, char *weight, char *acfg, char *aweight, int clear, 
     //float orig_rate = anet->learning_rate;
 
     int i, j, k;
-    layer imlayer = {0};
+    layer imlayer;
+    memset(&imlayer, 0x00, sizeof(layer));
+
     for (i = 0; i < gnet->n; ++i) {
         if (gnet->layers[i].out_c == 3) {
             imlayer = gnet->layers[i];
@@ -887,7 +889,9 @@ void train_colorizer(char *cfg, char *weight, char *acfg, char *aweight, int cle
     network *anet = load_network(acfg, aweight, clear);
 
     int i, j, k;
-    layer imlayer = {0};
+    layer imlayer;
+    memset(&imlayer, 0x00, sizeof(layer));
+
     for (i = 0; i < net->n; ++i) {
         if (net->layers[i].out_c == 3) {
             imlayer = net->layers[i];
@@ -923,8 +927,8 @@ void train_colorizer(char *cfg, char *weight, char *acfg, char *aweight, int cle
     //int y_size = x_size;
     net->delta = 0;
     net->train = 1;
-    float *pixs = calloc(x_size, sizeof(float));
-    float *graypixs = calloc(x_size, sizeof(float));
+    float *pixs = (float *)calloc(x_size, sizeof(float));
+    float *graypixs = (float *)calloc(x_size, sizeof(float));
     //float *y = calloc(y_size, sizeof(float));
 
     //int ay_size = anet->outputs*anet->batch;

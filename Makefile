@@ -1,4 +1,4 @@
-GPU=0 
+GPU=1
 CUDNN=0
 OPENCV=1
 OPENMP=0
@@ -27,7 +27,7 @@ OPTS=-Ofast
 LDFLAGS= -lm -pthread 
 COMMON= -Iinclude/ -Isrc/
 CFLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC
-CPP_FLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC -std=c++11 -Werror 
+CPP_CFLAGS=-std=c++11
 
 ifeq ($(OPENMP), 1) 
 CFLAGS+= -fopenmp
@@ -48,7 +48,7 @@ endif
 
 ifeq ($(GPU), 1) 
 COMMON+= -DGPU -I/usr/local/cuda/include/
-CFLAGS+= -DGPU
+CFLAGS+= -DGPU 
 LDFLAGS+= -L/usr/local/cuda/lib64 -lcuda -lcudart -lcublas -lcurand
 endif
 
@@ -86,10 +86,10 @@ $(OBJDIR)%.o: %.c $(DEPS)
 	$(CC) $(COMMON) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cxx $(DEPS)
-	$(CC) $(COMMON) $(CPP_FLAGS) -c $< -o $@
+	$(CC) $(COMMON) $(CFLAGS) $(CPP_CFLAGS) -c $< -o $@
 
 $(OBJDIR)%.o: %.cu $(DEPS)
-	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@
+	$(NVCC) $(ARCH) $(COMMON) --compiler-options "$(CFLAGS)" -c $< -o $@ $(CPP_CFLAGS)
 
 obj:
 	mkdir -p obj

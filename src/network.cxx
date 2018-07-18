@@ -427,7 +427,7 @@ int resize_network(network *net, int w, int h)
         }
     }else {
         free(net->workspace);
-        net->workspace = calloc(1, workspace_size);
+        net->workspace = (float *)calloc(1, workspace_size);
     }
 #else
     free(net->workspace);
