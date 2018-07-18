@@ -162,7 +162,7 @@ void train_go(char *cfgfile, char *weightfile, char *filename, int *gpus, int ng
     int N = m.n;
     printf("Moves: %d\n", N);
     int epoch = (*net->seen)/N;
-    while(get_current_batch(net) < net->max_batches || net->max_batches == 0){
+    while((int)get_current_batch(net) < net->max_batches || net->max_batches == 0){
         double time=what_time_is_it_now();
 
         data train = random_go_moves(m, net->batch*net->subdivisions*ngpus);
@@ -184,7 +184,7 @@ void train_go(char *cfgfile, char *weightfile, char *filename, int *gpus, int ng
         if(avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.95 + loss*.05;
         printf("%ld, %.3f: %f, %f avg, %f rate, %lf seconds, %ld images\n", get_current_batch(net), (float)(*net->seen)/N, loss, avg_loss, get_current_rate(net), what_time_is_it_now()-time, *net->seen);
-        if(*net->seen/N > epoch){
+        if(*net->seen/N > (float)epoch){
             epoch = *net->seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights", backup_directory,base, epoch);

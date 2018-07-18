@@ -96,7 +96,7 @@ void train_classifier(char *datacfg, char *cfgfile, char *weightfile, int *gpus,
 
     int count = 0;
     int epoch = (*net->seen)/N;
-    while(get_current_batch(net) < net->max_batches || net->max_batches == 0){
+    while((int)get_current_batch(net) < net->max_batches || net->max_batches == 0){
         if(net->random && count++%40 == 0){
             printf("Resizing\n");
             int dim = (rand() % 11 + 4) * 32;
@@ -143,7 +143,7 @@ void train_classifier(char *datacfg, char *cfgfile, char *weightfile, int *gpus,
         avg_loss = avg_loss*.9 + loss*.1;
         printf("%ld, %.3f: %f, %f avg, %f rate, %lf seconds, %ld images\n", get_current_batch(net), (float)(*net->seen)/N, loss, avg_loss, get_current_rate(net), what_time_is_it_now()-time, *net->seen);
         free_data(train);
-        if(*net->seen/N > epoch){
+        if(*net->seen/N > (float)epoch){
             epoch = *net->seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
@@ -931,7 +931,7 @@ void gun_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
         printf("\033[1;1H");
 
         int threat = 0;
-        for(i = 0; i < sizeof(bad_cats)/sizeof(bad_cats[0]); ++i){
+        for(i = 0; (size_t)i < sizeof(bad_cats)/sizeof(bad_cats[0]); ++i){
             int index = bad_cats[i];
             if(predictions[index] > .01){
                 printf("Threat Detected!\n");
@@ -940,7 +940,7 @@ void gun_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
             }
         }
         if(!threat) printf("Scanning...\n");
-        for(i = 0; i < sizeof(bad_cats)/sizeof(bad_cats[0]); ++i){
+        for(i = 0; (size_t)i < sizeof(bad_cats)/sizeof(bad_cats[0]); ++i){
             int index = bad_cats[i];
             if(predictions[index] > .01){
                 printf("%s\n", names[index]);

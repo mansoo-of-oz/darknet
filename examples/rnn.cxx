@@ -188,7 +188,7 @@ void train_char_rnn(char *cfgfile, char *weightfile, char *filename, int clear, 
     }
 
     clock_t time;
-    while(get_current_batch(net) < net->max_batches){
+    while((int)get_current_batch(net) < net->max_batches){
         i += 1;
         time=clock();
         float_pair p;

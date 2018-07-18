@@ -16,14 +16,14 @@ void train_cifar(char *cfgfile, char *weightfile)
     char **labels = get_labels((char *)"data/cifar/labels.txt");
     int epoch = (*net->seen)/N;
     data train = load_all_cifar10();
-    while(get_current_batch(net) < net->max_batches || net->max_batches == 0){
+    while((int)get_current_batch(net) < net->max_batches || net->max_batches == 0){
         clock_t time=clock();
 
         float loss = train_network_sgd(net, train, 1);
         if(avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.95 + loss*.05;
         printf("%ld, %.3f: %f, %f avg, %f rate, %lf seconds, %ld images\n", get_current_batch(net), (float)(*net->seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net->seen);
-        if(*net->seen/N > epoch){
+        if(*net->seen/N > (float)epoch){
             epoch = *net->seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
@@ -69,14 +69,14 @@ void train_cifar_distill(char *cfgfile, char *weightfile)
     scale_matrix(train.y, 1. - weight);
     matrix_add_matrix(soft, train.y);
 
-    while(get_current_batch(net) < net->max_batches || net->max_batches == 0){
+    while((int)get_current_batch(net) < net->max_batches || net->max_batches == 0){
         clock_t time=clock();
 
         float loss = train_network_sgd(net, train, 1);
         if(avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.95 + loss*.05;
         printf("%ld, %.3f: %f, %f avg, %f rate, %lf seconds, %ld images\n", get_current_batch(net), (float)(*net->seen)/N, loss, avg_loss, get_current_rate(net), sec(clock()-time), *net->seen);
-        if(*net->seen/N > epoch){
+        if(*net->seen/N > (float)epoch){
             epoch = *net->seen/N;
             char buff[256];
             sprintf(buff, "%s/%s_%d.weights",backup_directory,base, epoch);
