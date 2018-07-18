@@ -5,7 +5,7 @@
 
 float *get_regression_values(char **labels, int n)
 {
-    float *v = calloc(n, sizeof(float));
+    float *v = (float *)calloc(n, sizeof(float));
     int i;
     for(i = 0; i < n; ++i){
         char *p = strchr(labels[i], ' ');
@@ -23,7 +23,7 @@ void train_classifier(char *datacfg, char *cfgfile, char *weightfile, int *gpus,
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     printf("%d\n", ngpus);
-    network **nets = calloc(ngpus, sizeof(network*));
+    network **nets = (network **)calloc(ngpus, sizeof(network*));
 
     srand(time(0));
     int seed = rand();
@@ -43,13 +43,13 @@ void train_classifier(char *datacfg, char *cfgfile, char *weightfile, int *gpus,
     printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net->learning_rate, net->momentum, net->decay);
     list *options = read_data_cfg(datacfg);
 
-    char *backup_directory = option_find_str(options, "backup", "/backup/");
-    int tag = option_find_int_quiet(options, "tag", 0);
-    char *label_list = option_find_str(options, "labels", "data/labels.list");
-    char *train_list = option_find_str(options, "train", "data/train.list");
-    char *tree = option_find_str(options, "tree", 0);
+    char *backup_directory = option_find_str(options, (char *)"backup", (char *)"/backup/");
+    int tag = option_find_int_quiet(options, (char *)"tag", 0);
+    char *label_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    char *train_list = option_find_str(options, (char *)"train", (char *)"data/train.list");
+    char *tree = option_find_str(options, (char *)"tree", 0);
     if (tree) net->hierarchy = read_tree(tree);
-    int classes = option_find_int(options, "classes", 2);
+    int classes = option_find_int(options, (char *)"classes", 2);
 
     char **labels = 0;
     if(!tag){
@@ -175,10 +175,10 @@ void validate_classifier_crop(char *datacfg, char *filename, char *weightfile)
 
     list *options = read_data_cfg(datacfg);
 
-    char *label_list = option_find_str(options, "labels", "data/labels.list");
-    char *valid_list = option_find_str(options, "valid", "data/train.list");
-    int classes = option_find_int(options, "classes", 2);
-    int topk = option_find_int(options, "top", 1);
+    char *label_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    char *valid_list = option_find_str(options, (char *)"valid", (char *)"data/train.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
+    int topk = option_find_int(options, (char *)"top", 1);
 
     char **labels = get_labels(label_list);
     list *plist = get_paths(valid_list);
@@ -240,10 +240,10 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
 
     list *options = read_data_cfg(datacfg);
 
-    char *label_list = option_find_str(options, "labels", "data/labels.list");
-    char *valid_list = option_find_str(options, "valid", "data/train.list");
-    int classes = option_find_int(options, "classes", 2);
-    int topk = option_find_int(options, "top", 1);
+    char *label_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    char *valid_list = option_find_str(options, (char *)"valid", (char *)"data/train.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
+    int topk = option_find_int(options, (char *)"top", 1);
 
     char **labels = get_labels(label_list);
     list *plist = get_paths(valid_list);
@@ -254,14 +254,14 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
 
     float avg_acc = 0;
     float avg_topk = 0;
-    int *indexes = calloc(topk, sizeof(int));
+    int *indexes = (int *)calloc(topk, sizeof(int));
 
     for(i = 0; i < m; ++i){
-        int class = -1;
+        int class_val = -1;
         char *path = paths[i];
         for(j = 0; j < classes; ++j){
             if(strstr(path, labels[j])){
-                class = j;
+                class_val = j;
                 break;
             }
         }
@@ -281,7 +281,7 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
         images[7] = crop_image(im, 0, 0, w, h);
         images[8] = crop_image(im, -shift, shift, w, h);
         images[9] = crop_image(im, shift, shift, w, h);
-        float *pred = calloc(classes, sizeof(float));
+        float *pred = (float *)calloc(classes, sizeof(float));
         for(j = 0; j < 10; ++j){
             float *p = network_predict(net, images[j].data);
             if(net->hierarchy) hierarchy_predictions(p, net->outputs, net->hierarchy, 1, 1);
@@ -291,9 +291,9 @@ void validate_classifier_10(char *datacfg, char *filename, char *weightfile)
         free_image(im);
         top_k(pred, classes, topk, indexes);
         free(pred);
-        if(indexes[0] == class) avg_acc += 1;
+        if(indexes[0] == class_val) avg_acc += 1;
         for(j = 0; j < topk; ++j){
-            if(indexes[j] == class) avg_topk += 1;
+            if(indexes[j] == class_val) avg_topk += 1;
         }
 
         printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
@@ -309,10 +309,10 @@ void validate_classifier_full(char *datacfg, char *filename, char *weightfile)
 
     list *options = read_data_cfg(datacfg);
 
-    char *label_list = option_find_str(options, "labels", "data/labels.list");
-    char *valid_list = option_find_str(options, "valid", "data/train.list");
-    int classes = option_find_int(options, "classes", 2);
-    int topk = option_find_int(options, "top", 1);
+    char *label_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    char *valid_list = option_find_str(options, (char *)"valid", (char *)"data/train.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
+    int topk = option_find_int(options, (char *)"top", 1);
 
     char **labels = get_labels(label_list);
     list *plist = get_paths(valid_list);
@@ -323,15 +323,15 @@ void validate_classifier_full(char *datacfg, char *filename, char *weightfile)
 
     float avg_acc = 0;
     float avg_topk = 0;
-    int *indexes = calloc(topk, sizeof(int));
+    int *indexes = (int *)calloc(topk, sizeof(int));
 
     int size = net->w;
     for(i = 0; i < m; ++i){
-        int class = -1;
+        int class_val = -1;
         char *path = paths[i];
         for(j = 0; j < classes; ++j){
             if(strstr(path, labels[j])){
-                class = j;
+                class_val = j;
                 break;
             }
         }
@@ -348,9 +348,9 @@ void validate_classifier_full(char *datacfg, char *filename, char *weightfile)
         free_image(resized);
         top_k(pred, classes, topk, indexes);
 
-        if(indexes[0] == class) avg_acc += 1;
+        if(indexes[0] == class_val) avg_acc += 1;
         for(j = 0; j < topk; ++j){
-            if(indexes[j] == class) avg_topk += 1;
+            if(indexes[j] == class_val) avg_topk += 1;
         }
 
         printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
@@ -367,12 +367,12 @@ void validate_classifier_single(char *datacfg, char *filename, char *weightfile)
 
     list *options = read_data_cfg(datacfg);
 
-    char *label_list = option_find_str(options, "labels", "data/labels.list");
-    char *leaf_list = option_find_str(options, "leaves", 0);
+    char *label_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    char *leaf_list = option_find_str(options, (char *)"leaves", 0);
     if(leaf_list) change_leaves(net->hierarchy, leaf_list);
-    char *valid_list = option_find_str(options, "valid", "data/train.list");
-    int classes = option_find_int(options, "classes", 2);
-    int topk = option_find_int(options, "top", 1);
+    char *valid_list = option_find_str(options, (char *)"valid", (char *)"data/train.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
+    int topk = option_find_int(options, (char *)"top", 1);
 
     char **labels = get_labels(label_list);
     list *plist = get_paths(valid_list);
@@ -383,14 +383,14 @@ void validate_classifier_single(char *datacfg, char *filename, char *weightfile)
 
     float avg_acc = 0;
     float avg_topk = 0;
-    int *indexes = calloc(topk, sizeof(int));
+    int *indexes = (int *)calloc(topk, sizeof(int));
 
     for(i = 0; i < m; ++i){
-        int class = -1;
+        int class_val = -1;
         char *path = paths[i];
         for(j = 0; j < classes; ++j){
             if(strstr(path, labels[j])){
-                class = j;
+                class_val = j;
                 break;
             }
         }
@@ -406,12 +406,12 @@ void validate_classifier_single(char *datacfg, char *filename, char *weightfile)
         free_image(crop);
         top_k(pred, classes, topk, indexes);
 
-        if(indexes[0] == class) avg_acc += 1;
+        if(indexes[0] == class_val) avg_acc += 1;
         for(j = 0; j < topk; ++j){
-            if(indexes[j] == class) avg_topk += 1;
+            if(indexes[j] == class_val) avg_topk += 1;
         }
 
-        printf("%s, %d, %f, %f, \n", paths[i], class, pred[0], pred[1]);
+        printf("%s, %d, %f, %f, \n", paths[i], class_val, pred[0], pred[1]);
         printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
     }
 }
@@ -425,10 +425,10 @@ void validate_classifier_multi(char *datacfg, char *cfg, char *weights)
 
     list *options = read_data_cfg(datacfg);
 
-    char *label_list = option_find_str(options, "labels", "data/labels.list");
-    char *valid_list = option_find_str(options, "valid", "data/train.list");
-    int classes = option_find_int(options, "classes", 2);
-    int topk = option_find_int(options, "top", 1);
+    char *label_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    char *valid_list = option_find_str(options, (char *)"valid", (char *)"data/train.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
+    int topk = option_find_int(options, (char *)"top", 1);
 
     char **labels = get_labels(label_list);
     list *plist = get_paths(valid_list);
@@ -442,18 +442,18 @@ void validate_classifier_multi(char *datacfg, char *cfg, char *weights)
 
     float avg_acc = 0;
     float avg_topk = 0;
-    int *indexes = calloc(topk, sizeof(int));
+    int *indexes = (int *)calloc(topk, sizeof(int));
 
     for(i = 0; i < m; ++i){
-        int class = -1;
+        int class_val = -1;
         char *path = paths[i];
         for(j = 0; j < classes; ++j){
             if(strstr(path, labels[j])){
-                class = j;
+                class_val = j;
                 break;
             }
         }
-        float *pred = calloc(classes, sizeof(float));
+        float *pred = (float *)calloc(classes, sizeof(float));
         image im = load_image_color(paths[i], 0, 0);
         for(j = 0; j < nscales; ++j){
             image r = resize_max(im, scales[j]);
@@ -469,9 +469,9 @@ void validate_classifier_multi(char *datacfg, char *cfg, char *weights)
         free_image(im);
         top_k(pred, classes, topk, indexes);
         free(pred);
-        if(indexes[0] == class) avg_acc += 1;
+        if(indexes[0] == class_val) avg_acc += 1;
         for(j = 0; j < topk; ++j){
-            if(indexes[j] == class) avg_topk += 1;
+            if(indexes[j] == class_val) avg_topk += 1;
         }
 
         printf("%d: top 1: %f, top %d: %f\n", i, avg_acc/(i+1), topk, avg_topk/(i+1));
@@ -486,14 +486,14 @@ void try_classifier(char *datacfg, char *cfgfile, char *weightfile, char *filena
 
     list *options = read_data_cfg(datacfg);
 
-    char *name_list = option_find_str(options, "names", 0);
-    if(!name_list) name_list = option_find_str(options, "labels", "data/labels.list");
-    int top = option_find_int(options, "top", 1);
+    char *name_list = option_find_str(options, (char *)"names", 0);
+    if(!name_list) name_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    int top = option_find_int(options, (char *)"top", 1);
 
     int i = 0;
     char **names = get_labels(name_list);
     clock_t time;
-    int *indexes = calloc(top, sizeof(int));
+    int *indexes = (int *)calloc(top, sizeof(int));
     char buff[256];
     char *input = buff;
     while(1){
@@ -564,14 +564,14 @@ void predict_classifier(char *datacfg, char *cfgfile, char *weightfile, char *fi
 
     list *options = read_data_cfg(datacfg);
 
-    char *name_list = option_find_str(options, "names", 0);
-    if(!name_list) name_list = option_find_str(options, "labels", "data/labels.list");
-    if(top == 0) top = option_find_int(options, "top", 1);
+    char *name_list = option_find_str(options, (char *)"names", 0);
+    if(!name_list) name_list = option_find_str(options, (char *)"labels", (char *)"data/labels.list");
+    if(top == 0) top = option_find_int(options, (char *)"top", 1);
 
     int i = 0;
     char **names = get_labels(name_list);
     clock_t time;
-    int *indexes = calloc(top, sizeof(int));
+    int *indexes = (int *)calloc(top, sizeof(int));
     char buff[256];
     char *input = buff;
     while(1){
@@ -619,9 +619,9 @@ void label_classifier(char *datacfg, char *filename, char *weightfile)
 
     list *options = read_data_cfg(datacfg);
 
-    char *label_list = option_find_str(options, "names", "data/labels.list");
-    char *test_list = option_find_str(options, "test", "data/train.list");
-    int classes = option_find_int(options, "classes", 2);
+    char *label_list = option_find_str(options, (char *)"names", (char *)"data/labels.list");
+    char *test_list = option_find_str(options, (char *)"test", (char *)"data/train.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
 
     char **labels = get_labels(label_list);
     list *plist = get_paths(test_list);
@@ -654,8 +654,8 @@ void test_classifier(char *datacfg, char *cfgfile, char *weightfile, int target_
 
     list *options = read_data_cfg(datacfg);
 
-    char *test_list = option_find_str(options, "test", "data/test.list");
-    int classes = option_find_int(options, "classes", 2);
+    char *test_list = option_find_str(options, (char *)"test", (char *)"data/test.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
 
     list *plist = get_paths(test_list);
 
@@ -724,8 +724,8 @@ void file_output_classifier(char *datacfg, char *filename, char *weightfile, cha
 
     list *options = read_data_cfg(datacfg);
 
-    //char *label_list = option_find_str(options, "names", "data/labels.list");
-    int classes = option_find_int(options, "classes", 2);
+    //char *label_list = option_find_str(options, (char *)"names", (char *)"data/labels.list");
+    int classes = option_find_int(options, (char *)"classes", 2);
 
     list *plist = get_paths(listfile);
 
@@ -774,12 +774,12 @@ void threat_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_i
         cap = cvCaptureFromCAM(cam_index);
     }
 
-    int top = option_find_int(options, "top", 1);
+    int top = option_find_int(options, (char *)"top", 1);
 
-    char *name_list = option_find_str(options, "names", 0);
+    char *name_list = option_find_str(options, (char *)"names", 0);
     char **names = get_labels(name_list);
 
-    int *indexes = calloc(top, sizeof(int));
+    int *indexes = (int *)calloc(top, sizeof(int));
 
     if(!cap) error("Couldn't connect to webcam.\n");
     //cvNamedWindow("Threat", CV_WINDOW_NORMAL); 
@@ -903,12 +903,12 @@ void gun_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_inde
         cap = cvCaptureFromCAM(cam_index);
     }
 
-    int top = option_find_int(options, "top", 1);
+    int top = option_find_int(options, (char *)"top", 1);
 
-    char *name_list = option_find_str(options, "names", 0);
+    char *name_list = option_find_str(options, (char *)"names", 0);
     char **names = get_labels(name_list);
 
-    int *indexes = calloc(top, sizeof(int));
+    int *indexes = (int *)calloc(top, sizeof(int));
 
     if(!cap) error("Couldn't connect to webcam.\n");
     cvNamedWindow("Threat Detection", CV_WINDOW_NORMAL); 
@@ -989,13 +989,13 @@ void demo_classifier(char *datacfg, char *cfgfile, char *weightfile, int cam_ind
         cvSetCaptureProperty(cap, CV_CAP_PROP_FRAME_HEIGHT, h);
     }
 
-    int top = option_find_int(options, "top", 1);
+    int top = option_find_int(options, (char *)"top", 1);
 
-    char *label_list = option_find_str(options, "labels", 0);
-    char *name_list = option_find_str(options, "names", label_list);
+    char *label_list = option_find_str(options, (char *)"labels", 0);
+    char *name_list = option_find_str(options, (char *)"names", label_list);
     char **names = get_labels(name_list);
 
-    int *indexes = calloc(top, sizeof(int));
+    int *indexes = (int *)calloc(top, sizeof(int));
 
     if(!cap) error("Couldn't connect to webcam.\n");
     cvNamedWindow(base, CV_WINDOW_NORMAL); 
@@ -1058,34 +1058,34 @@ void run_classifier(int argc, char **argv)
         return;
     }
 
-    char *gpu_list = find_char_arg(argc, argv, "-gpus", 0);
+    char *gpu_list = find_char_arg(argc, argv, (char *)"-gpus", 0);
     int ngpus;
     int *gpus = read_intlist(gpu_list, &ngpus, gpu_index);
 
 
-    int cam_index = find_int_arg(argc, argv, "-c", 0);
-    int top = find_int_arg(argc, argv, "-t", 0);
-    int clear = find_arg(argc, argv, "-clear");
+    int cam_index = find_int_arg(argc, argv, (char *)"-c", 0);
+    int top = find_int_arg(argc, argv, (char *)"-t", 0);
+    int clear = find_arg(argc, argv, (char *)"-clear");
     char *data = argv[3];
     char *cfg = argv[4];
     char *weights = (argc > 5) ? argv[5] : 0;
     char *filename = (argc > 6) ? argv[6]: 0;
     char *layer_s = (argc > 7) ? argv[7]: 0;
     int layer = layer_s ? atoi(layer_s) : -1;
-    if(0==strcmp(argv[2], "predict")) predict_classifier(data, cfg, weights, filename, top);
-    else if(0==strcmp(argv[2], "fout")) file_output_classifier(data, cfg, weights, filename);
-    else if(0==strcmp(argv[2], "try")) try_classifier(data, cfg, weights, filename, atoi(layer_s));
-    else if(0==strcmp(argv[2], "train")) train_classifier(data, cfg, weights, gpus, ngpus, clear);
-    else if(0==strcmp(argv[2], "demo")) demo_classifier(data, cfg, weights, cam_index, filename);
-    else if(0==strcmp(argv[2], "gun")) gun_classifier(data, cfg, weights, cam_index, filename);
-    else if(0==strcmp(argv[2], "threat")) threat_classifier(data, cfg, weights, cam_index, filename);
-    else if(0==strcmp(argv[2], "test")) test_classifier(data, cfg, weights, layer);
-    else if(0==strcmp(argv[2], "label")) label_classifier(data, cfg, weights);
-    else if(0==strcmp(argv[2], "valid")) validate_classifier_single(data, cfg, weights);
-    else if(0==strcmp(argv[2], "validmulti")) validate_classifier_multi(data, cfg, weights);
-    else if(0==strcmp(argv[2], "valid10")) validate_classifier_10(data, cfg, weights);
-    else if(0==strcmp(argv[2], "validcrop")) validate_classifier_crop(data, cfg, weights);
-    else if(0==strcmp(argv[2], "validfull")) validate_classifier_full(data, cfg, weights);
+    if(0==strcmp(argv[2], (char *)"predict")) predict_classifier(data, cfg, weights, filename, top);
+    else if(0==strcmp(argv[2], (char *)"fout")) file_output_classifier(data, cfg, weights, filename);
+    else if(0==strcmp(argv[2], (char *)"try")) try_classifier(data, cfg, weights, filename, atoi(layer_s));
+    else if(0==strcmp(argv[2], (char *)"train")) train_classifier(data, cfg, weights, gpus, ngpus, clear);
+    else if(0==strcmp(argv[2], (char *)"demo")) demo_classifier(data, cfg, weights, cam_index, filename);
+    else if(0==strcmp(argv[2], (char *)"gun")) gun_classifier(data, cfg, weights, cam_index, filename);
+    else if(0==strcmp(argv[2], (char *)"threat")) threat_classifier(data, cfg, weights, cam_index, filename);
+    else if(0==strcmp(argv[2], (char *)"test")) test_classifier(data, cfg, weights, layer);
+    else if(0==strcmp(argv[2], (char *)"label")) label_classifier(data, cfg, weights);
+    else if(0==strcmp(argv[2], (char *)"valid")) validate_classifier_single(data, cfg, weights);
+    else if(0==strcmp(argv[2], (char *)"validmulti")) validate_classifier_multi(data, cfg, weights);
+    else if(0==strcmp(argv[2], (char *)"valid10")) validate_classifier_10(data, cfg, weights);
+    else if(0==strcmp(argv[2], (char *)"validcrop")) validate_classifier_crop(data, cfg, weights);
+    else if(0==strcmp(argv[2], (char *)"validfull")) validate_classifier_full(data, cfg, weights);
 }
 
 

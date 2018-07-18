@@ -38,7 +38,7 @@ import darknet as dn
 # Darknet
 net = dn.load_net("cfg/tiny-yolo.cfg", "tiny-yolo.weights", 0)
 meta = dn.load_meta("cfg/coco.data")
-r = dn.detect(net, meta, "data/dog.jpg")
+r = dn.detect(net, meta, (char *)"data/dog.jpg")
 print r
 
 # scipy

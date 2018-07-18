@@ -123,55 +123,55 @@ char *get_layer_string(LAYER_TYPE a)
 {
     switch(a){
         case CONVOLUTIONAL:
-            return "convolutional";
+            return (char*)"convolutional";
         case ACTIVE:
-            return "activation";
+            return (char*)"activation";
         case LOCAL:
-            return "local";
+            return (char*)"local";
         case DECONVOLUTIONAL:
-            return "deconvolutional";
+            return (char*)"deconvolutional";
         case CONNECTED:
-            return "connected";
+            return (char*)"connected";
         case RNN:
-            return "rnn";
+            return (char*)"rnn";
         case GRU:
-            return "gru";
+            return (char*)"gru";
         case LSTM:
-	    return "lstm";
+	        return (char*)"lstm";
         case CRNN:
-            return "crnn";
+            return (char*)"crnn";
         case MAXPOOL:
-            return "maxpool";
+            return (char*)"maxpool";
         case REORG:
-            return "reorg";
+            return (char*)"reorg";
         case AVGPOOL:
-            return "avgpool";
+            return (char*)"avgpool";
         case SOFTMAX:
-            return "softmax";
+            return (char*)"softmax";
         case DETECTION:
-            return "detection";
+            return (char*)"detection";
         case REGION:
-            return "region";
+            return (char*)"region";
         case YOLO:
-            return "yolo";
+            return (char*)"yolo";
         case DROPOUT:
-            return "dropout";
+            return (char*)"dropout";
         case CROP:
-            return "crop";
+            return (char*)"crop";
         case COST:
-            return "cost";
+            return (char*)"cost";
         case ROUTE:
-            return "route";
+            return (char*)"route";
         case SHORTCUT:
-            return "shortcut";
+            return (char*)"shortcut";
         case NORMALIZATION:
-            return "normalization";
+            return (char*)"normalization";
         case BATCHNORM:
-            return "batchnorm";
+            return (char*)"batchnorm";
         default:
             break;
     }
-    return "none";
+    return (char*)"none";
 }
 
 network *make_network(int n)

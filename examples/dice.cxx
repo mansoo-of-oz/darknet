@@ -109,8 +109,8 @@ void run_dice(int argc, char **argv)
     char *cfg = argv[3];
     char *weights = (argc > 4) ? argv[4] : 0;
     char *filename = (argc > 5) ? argv[5]: 0;
-    if(0==strcmp(argv[2], "test")) test_dice(cfg, weights, filename);
-    else if(0==strcmp(argv[2], "train")) train_dice(cfg, weights);
-    else if(0==strcmp(argv[2], "valid")) validate_dice(cfg, weights);
+    if(0==strcmp(argv[2], (char *)"test")) test_dice(cfg, weights, filename);
+    else if(0==strcmp(argv[2], (char *)"train")) train_dice(cfg, weights);
+    else if(0==strcmp(argv[2], (char *)"valid")) validate_dice(cfg, weights);
 }
 

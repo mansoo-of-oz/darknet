@@ -150,7 +150,7 @@ if __name__ == "__main__":
     #print r[:10]
     net = load_net("cfg/tiny-yolo.cfg", "tiny-yolo.weights", 0)
     meta = load_meta("cfg/coco.data")
-    r = detect(net, meta, "data/dog.jpg")
+    r = detect(net, meta, (char *)"data/dog.jpg")
     print r
     
 
